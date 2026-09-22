@@ -4,31 +4,31 @@ import { CarrierDashboard } from './carrier-dashboard.js';
 export { CarrierDashboard };
 
 async function main(): Promise<void> {
-  console.log('🚛 Iniciando servicio Consumidor: Dashboard de Transportistas...');
+  console.log('[CARRIER-SERVICE:START] Initializing Carrier Dashboard consumer...');
 
   const client = new SolaceClient();
 
   try {
-    console.log('🔌 Conectando a Solace PubSub+...');
+    console.log('[SOLACE:CONNECTING] Connecting to Solace PubSub+ broker...');
     await client.connect();
-    console.log('✅ Conexión con Solace establecida exitosamente.');
+    console.log('[SOLACE:CONNECTED] Connection established successfully.');
 
     const dashboard = new CarrierDashboard(client);
     await dashboard.start();
 
     // Manejo de apagado elegante (Ctrl+C)
     const cleanup = async () => {
-      console.log('\n🛑 Cerrando Dashboard de Transportistas...');
+      console.log('\n[SHUTDOWN] Terminating Carrier Dashboard service...');
       dashboard.stop();
       await client.disconnect();
-      console.log('👋 Desconectado exitosamente.');
+      console.log('[SOLACE:DISCONNECTED] Session disconnected cleanly.');
       process.exit(0);
     };
 
     process.on('SIGINT', () => void cleanup());
     process.on('SIGTERM', () => void cleanup());
   } catch (error) {
-    console.error('❌ Error fatal al iniciar el Dashboard de Transportistas:', error);
+    console.error('[ERROR:CARRIER-SERVICE] Fatal error in Carrier Dashboard:', error);
     process.exit(1);
   }
 }

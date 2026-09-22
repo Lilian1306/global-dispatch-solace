@@ -25,10 +25,10 @@ export class DispatchPublisher {
     order: DispatchRequest,
     referenceDate: Date = new Date()
   ): Promise<DispatchResult> {
-    console.log(`\n==================================================`);
-    console.log(`📦 Procesando orden: ${order.shipperOrderId}`);
-    console.log(`📅 Pickup: ${order.pickupDate} | Delivery: ${order.deliveryDate}`);
-    console.log(`⏰ Fecha/Hora de referencia: ${referenceDate.toLocaleString()}`);
+    console.log(`\n--------------------------------------------------`);
+    console.log(`[DISPATCH:PROCESS] Order ID: ${order.shipperOrderId}`);
+    console.log(`[DISPATCH:DATES] Pickup: ${order.pickupDate} | Delivery: ${order.deliveryDate}`);
+    console.log(`[DISPATCH:TIME] Reference timestamp: ${referenceDate.toISOString()}`);
 
     const validation = validateDispatchRequest(order, referenceDate);
 
@@ -40,18 +40,18 @@ export class DispatchPublisher {
         notes: reason
       };
 
-      console.log(`❌ Validación fallida: ${reason}`);
-      console.log(`📢 Publicando estado 'Cancelled' a tópico: ${TOPICS.RESULTS}`);
+      console.log(`[VALIDATION:FAILED] Reason: ${reason}`);
+      console.log(`[PUBLISH:RESULTS] Emitting 'Cancelled' status to topic: ${TOPICS.RESULTS}`);
       this.client.publish(TOPICS.RESULTS, cancelledResult);
 
       return cancelledResult;
     }
 
-    // Orden válida
-    console.log(`✅ Validación exitosa. Cumple todas las reglas de negocio.`);
+    // Solicitud válida
+    console.log(`[VALIDATION:SUCCESS] Order complies with all business validation rules.`);
 
     // 1. Publicar a cola de transportistas vía tópico de órdenes
-    console.log(`📢 Publicando orden completa a transportistas (tópico: ${TOPICS.ORDERS})`);
+    console.log(`[PUBLISH:ORDERS] Emitting full load details to carriers topic: ${TOPICS.ORDERS}`);
     this.client.publish(TOPICS.ORDERS, order);
 
     // 2. Publicar confirmación 'Accepted' para el cliente
@@ -61,7 +61,7 @@ export class DispatchPublisher {
       notes: 'You will receive an email when a carrier accepts this dispatch request'
     };
 
-    console.log(`📢 Publicando estado 'Accepted' a clientes (tópico: ${TOPICS.RESULTS})`);
+    console.log(`[PUBLISH:RESULTS] Emitting 'Accepted' status to clients topic: ${TOPICS.RESULTS}`);
     this.client.publish(TOPICS.RESULTS, acceptedResult);
 
     return acceptedResult;

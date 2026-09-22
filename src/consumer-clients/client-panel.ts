@@ -15,18 +15,18 @@ export class ClientPanel {
    * Inicia la escucha de la cola de resultados para clientes (dispatch.results.queue)
    */
   public async start(): Promise<void> {
-    console.log(`📡 Iniciando consumidor para Panel de Clientes...`);
-    console.log(`📥 Escuchando cola de resultados: "${QUEUES.RESULTS}"`);
+    console.log(`[CLIENT-SERVICE:START] Initializing Client Status Panel consumer...`);
+    console.log(`[SOLACE:QUEUE] Listening to persistent queue: "${QUEUES.RESULTS}"`);
 
     this.consumer = await this.client.createQueueConsumer(
       QUEUES.RESULTS,
       (message) => this.handleResultMessage(message),
       (error) => {
-        console.error('❌ Error en el consumidor de resultados de clientes:', error);
+        console.error('[ERROR:CLIENT-CONSUMER] Failed to consume from results queue:', error);
       }
     );
 
-    console.log(`✅ Panel de clientes en línea. Esperando notificaciones de órdenes...`);
+    console.log(`[CLIENT-SERVICE:READY] Client status panel online. Awaiting order status updates...`);
   }
 
   /**
@@ -36,24 +36,24 @@ export class ClientPanel {
     try {
       const result = parseMessagePayload<DispatchResult>(message);
 
-      console.log('\n' + '═'.repeat(72));
-      console.log('                 👥 PANEL DE CLIENTES - NEWCRON');
-      console.log('═'.repeat(72));
-      console.log(` 📦 Orden ID: ${result.shipperOrderId}`);
+      console.log('\n' + '='.repeat(60));
+      console.log('         NEWCRON CLIENT DISPATCH - STATUS UPDATE');
+      console.log('='.repeat(60));
+      console.log(`  Order ID: ${result.shipperOrderId}`);
 
       if (result.status === 'Accepted') {
-        console.log(` 🏷️  Estado:   ✅ ACEPTADA (Accepted)`);
-        console.log(` 💬 Detalle:  ${result.notes}`);
-        console.log(' ℹ️  Tu solicitud fue aprobada y enviada a los transportistas.');
+        console.log(`  Status:   [ACCEPTED]`);
+        console.log(`  Details:  ${result.notes}`);
+        console.log('  Notice:   Order approved and dispatched to carrier pool.');
       } else {
-        console.log(` 🏷️  Estado:   ❌ CANCELADA (Cancelled)`);
-        console.log(` ⚠️  Motivo:   ${result.notes}`);
-        console.log(' ℹ️  La orden no cumplió las reglas de negocio de NewCron.');
+        console.log(`  Status:   [CANCELLED]`);
+        console.log(`  Reason:   ${result.notes}`);
+        console.log('  Notice:   Order rejected by business validation rules.');
       }
 
-      console.log('═'.repeat(72));
+      console.log('='.repeat(60));
     } catch (err) {
-      console.error('❌ Error al procesar resultado de cliente:', err);
+      console.error('[ERROR:CLIENT-PAYLOAD] Failed to deserialize result payload:', err);
     }
   }
 
@@ -62,7 +62,7 @@ export class ClientPanel {
       this.consumer.disconnect();
       this.consumer.dispose();
       this.consumer = null;
-      console.log('🛑 Panel de clientes detenido.');
+      console.log('[CLIENT-SERVICE:STOPPED] Client consumer stopped.');
     }
   }
 }
