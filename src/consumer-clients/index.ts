@@ -1,5 +1,5 @@
-import { SolaceClient } from '../utils/solace-client.js';
-import { ClientPanel } from './client-panel.js';
+import { SolaceClient } from '../utils/solace-client';
+import { ClientPanel } from './client-panel';
 
 export { ClientPanel };
 
