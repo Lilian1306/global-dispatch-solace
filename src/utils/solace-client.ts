@@ -74,7 +74,59 @@ export class SolaceClient {
     });
   }
 
+  public createQueueConsumer(
+    queueName: string,
+    onMessage: (message: solace.Message) => void,
+    onError?: (error: unknown) => void
+  ): Promise<solace.MessageConsumer> {
+    return new Promise((resolve, reject) => {
+      if (!this.session) {
+        return reject(new Error('Cannot create consumer without an active Solace session.'));
+      }
+
+      const messageConsumer = this.session.createMessageConsumer({
+        queueDescriptor: {
+          name: queueName,
+          type: solace.QueueType.QUEUE
+        },
+        acknowledgeMode: solace.MessageConsumerAcknowledgeMode.CLIENT
+      });
+
+      messageConsumer.on(solace.MessageConsumerEventName.UP, () => {
+        resolve(messageConsumer);
+      });
+
+      messageConsumer.on(solace.MessageConsumerEventName.CONNECT_FAILED_ERROR, (error: unknown) => {
+        if (onError) onError(error);
+        reject(error);
+      });
+
+      messageConsumer.on(solace.MessageConsumerEventName.MESSAGE, (message: solace.Message) => {
+        try {
+          onMessage(message);
+          message.acknowledge();
+        } catch (err) {
+          console.error(`Error processing message from queue "${queueName}":`, err);
+        }
+      });
+
+      messageConsumer.connect();
+    });
+  }
+
   public getSession(): solace.Session | null {
     return this.session;
   }
+}
+
+export function parseMessagePayload<T>(message: solace.Message): T {
+  const attachment = message.getBinaryAttachment();
+  if (!attachment) {
+    throw new Error('Received Solace message has no payload or binary attachment.');
+  }
+  const text =
+    typeof attachment === 'string'
+      ? attachment
+      : Buffer.from(attachment).toString('utf-8');
+  return JSON.parse(text) as T;
 }
