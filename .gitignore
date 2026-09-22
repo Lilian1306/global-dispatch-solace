@@ -1,0 +1,49 @@
+# Dependencias
+node_modules/
+package-lock.json.backup
+
+# Entornos y credenciales
+.env
+.env.local
+.env.*.local
+.env.development
+.env.test
+.env.production
+
+# Compilación y artefactos TypeScript
+dist/
+build/
+out/
+*.tsbuildinfo
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Documentos del enunciado y PDFs
+*.pdf
+Proyecto Global Dispatch.pdf
+
+# Editores e IDEs
+.vscode/
+!.vscode/extensions.json
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Archivos del sistema operativo
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
