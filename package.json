@@ -1,0 +1,33 @@
+{
+  "name": "global-dispatch-solace",
+  "version": "1.0.0",
+  "description": "Global Dispatch System using Solace PubSub+ and TypeScript for NewCron car haulers",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "dev": "ts-node src/index.ts",
+    "start:publisher": "ts-node src/publisher/index.ts",
+    "start:carriers": "ts-node src/consumer-carriers/index.ts",
+    "start:clients": "ts-node src/consumer-clients/index.ts",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "solace",
+    "pubsub",
+    "eda",
+    "dispatch",
+    "typescript",
+    "car-hauler"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^18.0.2",
+    "solclientjs": "^10.18.3"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.2",
+    "ts-node": "^10.9.2",
+    "typescript": "^7.0.2"
+  }
+}
