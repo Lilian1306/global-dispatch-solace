@@ -15,18 +15,18 @@ export class CarrierDashboard {
    * Inicia la suscripción y escucha de la cola de órdenes para transportistas.
    */
   public async start(): Promise<void> {
-    console.log(`📡 Iniciando consumidor para Dashboard de Transportistas...`);
-    console.log(`📥 Escuchando cola persistente: "${QUEUES.ORDERS}"`);
+    console.log(`[CARRIER-SERVICE:START] Initializing Carrier Dashboard consumer...`);
+    console.log(`[SOLACE:QUEUE] Listening to persistent queue: "${QUEUES.ORDERS}"`);
 
     this.consumer = await this.client.createQueueConsumer(
       QUEUES.ORDERS,
       (message) => this.handleOrderMessage(message),
       (error) => {
-        console.error('❌ Error en el consumidor de transportistas:', error);
+        console.error('[ERROR:CARRIER-CONSUMER] Failed to consume from queue:', error);
       }
     );
 
-    console.log(`✅ Dashboard de transportistas en línea. Esperando órdenes disponibles...`);
+    console.log(`[CARRIER-SERVICE:READY] Carrier dashboard online. Awaiting available loads...`);
   }
 
   /**
@@ -36,29 +36,29 @@ export class CarrierDashboard {
     try {
       const order = parseMessagePayload<DispatchRequest>(message);
 
-      console.log('\n' + '═'.repeat(72));
-      console.log('       🚚 NUEVA CARGA DISPONIBLE PARA TRANSPORTISTAS - NEWCRON');
-      console.log('═'.repeat(72));
-      console.log(` 📦 Orden ID:          ${order.shipperOrderId}`);
-      console.log(` 💰 Tarifa Ofrecida:   $${order.price.toLocaleString()} USD`);
-      console.log(` 📅 Fecha de Recogida: ${order.pickupDate}`);
-      console.log(` 🏁 Fecha de Entrega:  ${order.deliveryDate}`);
-      console.log('─'.repeat(72));
-      console.log(' 📍 ITINERARIO / PARADAS:');
+      console.log('\n' + '='.repeat(60));
+      console.log('         NEWCRON CARRIER DISPATCH - LOAD AVAILABLE');
+      console.log('='.repeat(60));
+      console.log(`  Order ID:      ${order.shipperOrderId}`);
+      console.log(`  Offered Rate:  $${order.price.toLocaleString()} USD`);
+      console.log(`  Pickup Date:   ${order.pickupDate}`);
+      console.log(`  Delivery Date: ${order.deliveryDate}`);
+      console.log('-'.repeat(60));
+      console.log('  ROUTE ITINERARY:');
       order.stops.forEach((stop) => {
-        console.log(`    Parada #${stop.stopNumber}: ${stop.city}, ${stop.state} (CP: ${stop.postalCode})`);
+        console.log(`    Stop #${stop.stopNumber}: ${stop.city}, ${stop.state} (${stop.postalCode})`);
       });
-      console.log('─'.repeat(72));
-      console.log(' 🚗 VEHÍCULOS A TRANSPORTAR:');
+      console.log('-'.repeat(60));
+      console.log('  VEHICLES TO HAUL:');
       order.vehicles.forEach((vehicle, idx) => {
         console.log(`    ${idx + 1}. ${vehicle.year} ${vehicle.make} ${vehicle.model}`);
       });
-      console.log('─'.repeat(72));
-      console.log(` 📝 Notas de Despacho: ${order.transportationReleaseNotes}`);
-      console.log('═'.repeat(72));
-      console.log(' ✔️ Carga registrada en el dashboard lista para asignación.');
+      console.log('-'.repeat(60));
+      console.log(`  Release Notes: ${order.transportationReleaseNotes}`);
+      console.log('='.repeat(60));
+      console.log('  [STATUS:READY] Load registered in carrier board for assignment.');
     } catch (err) {
-      console.error('❌ Error al deserializar payload de la orden:', err);
+      console.error('[ERROR:CARRIER-PAYLOAD] Failed to deserialize order payload:', err);
     }
   }
 
@@ -67,7 +67,7 @@ export class CarrierDashboard {
       this.consumer.disconnect();
       this.consumer.dispose();
       this.consumer = null;
-      console.log('🛑 Consumidor de transportistas detenido.');
+      console.log('[CARRIER-SERVICE:STOPPED] Carrier consumer stopped.');
     }
   }
 }

@@ -12,14 +12,14 @@ function formatDate(date: Date): string {
 }
 
 async function main(): Promise<void> {
-  console.log('🚀 Iniciando Servicio Publicador de NewCron (Solace PubSub+)...');
+  console.log('[PUBLISHER:START] Initializing NewCron Dispatch Publisher...');
 
   const client = new SolaceClient();
 
   try {
-    console.log('🔌 Conectando al broker Solace...');
+    console.log('[SOLACE:CONNECTING] Connecting to Solace PubSub+ broker...');
     await client.connect();
-    console.log('✅ Conexión establecida exitosamente.');
+    console.log('[SOLACE:CONNECTED] Session established successfully.');
 
     const publisher = new DispatchPublisher(client);
 
@@ -96,35 +96,34 @@ async function main(): Promise<void> {
       transportationReleaseNotes: 'Same-day delivery test'
     };
 
-    console.log('\n--- INICIANDO ENVÍO DE ESCENARIOS DE PRUEBA ---');
+    console.log('\n--- EXECUTING DISPATCH TEST SCENARIOS ---');
 
-    console.log('\n>>> [TEST 1] Caso Feliz (Válido)');
+    console.log('\n>>> [SCENARIO 1] Happy Path (Valid Future Dates)');
     await publisher.processOrder(validOrder, now);
 
-    console.log('\n>>> [TEST 2] Fecha de Pickup Anterior a Hoy (Inválido - Regla 1)');
+    console.log('\n>>> [SCENARIO 2] Rule 1 Violation (Past Pickup Date)');
     await publisher.processOrder(pastPickupOrder, now);
 
-    console.log('\n>>> [TEST 3] Mismo Día después de las 3:00 PM (Inválido - Regla 2)');
+    console.log('\n>>> [SCENARIO 3] Rule 2 Violation (Same-Day Request After 3:00 PM)');
     await publisher.processOrder(lateSameDayOrder, lateReferenceTime);
 
-    console.log('\n>>> [TEST 4] Fecha de Entrega sin Margen de 1 Día (Inválido - Regla 3)');
+    console.log('\n>>> [SCENARIO 4] Rule 3 Violation (Insufficient Delivery Margin)');
     await publisher.processOrder(invalidDeliveryOrder, now);
 
-    console.log('\n==================================================');
-    console.log('✅ Proceso de publicación completado exitosamente.');
+    console.log('\n--------------------------------------------------');
+    console.log('[PUBLISHER:COMPLETE] All test scenarios submitted successfully.');
 
     // Esperar un breve instante para asegurar el drenado de mensajes en la red
     await new Promise((resolve) => setTimeout(resolve, 2000));
 
     await client.disconnect();
-    console.log('👋 Desconectado de Solace.');
+    console.log('[SOLACE:DISCONNECTED] Connection closed.');
   } catch (error) {
-    console.error('❌ Error en el servicio publicador:', error);
+    console.error('[ERROR:PUBLISHER] Fatal error in publisher service:', error);
     process.exit(1);
   }
 }
 
-// Ejecutar si es invocado directamente
 if (require.main === module) {
   void main();
 }
