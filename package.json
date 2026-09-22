@@ -9,7 +9,7 @@
     "start:publisher": "ts-node src/publisher/index.ts",
     "start:carriers": "ts-node src/consumer-carriers/index.ts",
     "start:clients": "ts-node src/consumer-clients/index.ts",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node --test tests/validator.test.ts"
   },
   "keywords": [
     "solace",
@@ -28,6 +28,6 @@
   "devDependencies": {
     "@types/node": "^26.6.2",
     "ts-node": "^10.9.2",
-    "typescript": "^7.0.2"
+    "typescript": "^5.7.2"
   }
 }

@@ -1,2 +1,2 @@
-export * from './validator.js';
-export * from './solace-client.js';
+export * from './validator';
+export * from './solace-client';

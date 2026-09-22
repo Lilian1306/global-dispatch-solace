@@ -1,4 +1,4 @@
-import type { DispatchRequest, ValidationResult } from '../types/index.js';
+import type { DispatchRequest, ValidationResult } from '../types/index';
 
 function parseDateOnly(dateStr: string): Date {
   const parts = dateStr.split('-').map(Number);
