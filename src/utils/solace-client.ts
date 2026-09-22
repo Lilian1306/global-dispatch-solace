@@ -1,5 +1,5 @@
 import solace from 'solclientjs';
-import { SOLACE_CONFIG } from '../config/solace.config.js';
+import { SOLACE_CONFIG } from '../config/solace.config';
 
 let isInitialized = false;
 

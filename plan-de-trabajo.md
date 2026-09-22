@@ -29,7 +29,7 @@ El plan de trabajo fue diseñado y distribuido para ejecutarse en el periodo del
 | Fase | Días | Hitos y Actividades Principales | Estado |
 | :--- | :--- | :--- | :---: |
 | **Fase 1: Análisis y Base** | **Lun 21 - Mar 22** | • Análisis de requerimientos funcionales y reglas de negocio.<br>• Creación de la instancia en Solace PubSub+ Cloud (Message VPN, Colas y Suscripciones).<br>• Definición de modelos de datos TypeScript y lógica de validación de fechas/horarios. | Completado |
-| **Fase 2: Servicios y Consumidores** | **Mié 23 - Jue 24** | • Construcción del servicio publicador (`publisher`) con validación previa.<br>• Implementación del Consumidor 1: *Dashboard de Transportistas* (`consumer-carriers`).<br>• Implementación del Consumidor 2: *Panel de Clientes* (`consumer-clients`). | Completado |
+| **Fase 2: Servicios, Consumidores y Web UI** | **Mié 23 - Jue 24** | • Construcción del servicio publicador (`publisher`) con validación previa.<br>• Implementación del Consumidor 1: *Dashboard de Transportistas* (`consumer-carriers`).<br>• Implementación del Consumidor 2: *Panel de Clientes* (`consumer-clients`).<br>• Desarrollo de la capa Web UI interactiva (Express, Tailwind CSS, notificaciones con Toastify) para visualización en tiempo real. | Backend Completado / UI Pendiente |
 | **Fase 3: Pruebas y Validación** | **Vie 25 - Sáb 26** | • Pruebas unitarias y de integración de las 3 reglas de negocio.<br>• Pruebas de casos borde (horario límite 3:00 PM, fechas retroactivas, diferencia de días).<br>• Verificación de persistencia y consumo en colas de Solace. | Completado |
 | **Fase 4: Documentación y Entrega** | **Dom 27** | • Finalización y estilo del `README.md`.<br>• Preparación del repositorio con `.gitignore` higiénico.<br>• Envío formal del proyecto antes de las 23:55 hrs. | Listo para Entrega |
 
@@ -87,6 +87,10 @@ flowchart TD
 3. **Panel de Clientes (`src/consumer-clients`)**:
    - Escucha la cola `dispatch.results.queue`.
    - Informa en tiempo real al dueño del predio si su orden fue aprobada o cancelada y el motivo.
+4. **Capa Web UI Interactiva (`src/web` o `src/server`)**:
+   - Servidor web ligero con Express que expone un dashboard visual accesible vía navegador.
+   - Pestañas desacopladas para: Creador de solicitudes de clientes (con botones de prueba rápida de 1-clic), Dashboard de transportistas en vivo y Panel de estado de órdenes.
+   - Sistema de notificaciones flotantes en tiempo real mediante **Toastify** en la esquina superior derecha (avisos de carga disponible, aprobación o rechazo).
 
 ---
 
@@ -186,6 +190,7 @@ global-dispatch-solace/
     ├── publisher/              # Servicio validador y emisor de eventos
     ├── consumer-carriers/      # Dashboard para transportistas de car haulers
     ├── consumer-clients/       # Panel de visualización de estados para clientes
+    ├── web/                    # Capa Web UI (servidor Express, vistas Tailwind y Toastify)
     └── utils/                  # Conexión Solace PubSub+, validadores y utilitarios
 ```
 
@@ -226,13 +231,16 @@ SOLACE_PASSWORD=<tu-contraseña>
 ### Paso 4: Ejecución del Sistema
 Puedes correr los módulos mediante TypeScript:
 ```bash
-# Iniciar el publicador / validador de solicitudes
+# Iniciar la interfaz web interactiva (Web UI + Toastify)
+npm run start:web
+
+# Iniciar el publicador / validador de solicitudes en consola
 npm run start:publisher
 
-# Iniciar el dashboard de transportistas
+# Iniciar el dashboard de transportistas en consola
 npm run start:carriers
 
-# Iniciar el panel de clientes
+# Iniciar el panel de clientes en consola
 npm run start:clients
 ```
 

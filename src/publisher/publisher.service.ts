@@ -1,12 +1,12 @@
-import { SolaceClient } from '../utils/solace-client.js';
-import { validateDispatchRequest } from '../utils/validator.js';
-import { TOPICS } from '../config/solace.config.js';
+import { SolaceClient } from '../utils/solace-client';
+import { validateDispatchRequest } from '../utils/validator';
+import { TOPICS } from '../config/solace.config';
 import type {
   DispatchRequest,
   DispatchResult,
   AcceptedResult,
   CancelledResult
-} from '../types/index.js';
+} from '../types/index';
 
 export class DispatchPublisher {
   private client: SolaceClient;

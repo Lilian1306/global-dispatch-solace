@@ -1,5 +1,5 @@
-import { SolaceClient } from '../utils/solace-client.js';
-import { CarrierDashboard } from './carrier-dashboard.js';
+import { SolaceClient } from '../utils/solace-client';
+import { CarrierDashboard } from './carrier-dashboard';
 
 export { CarrierDashboard };
 

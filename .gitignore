@@ -16,6 +16,12 @@ build/
 out/
 *.tsbuildinfo
 
+# Artefactos compilados accidentalmente dentro de tests/ (las pruebas corren vía ts-node)
+tests/*.js
+tests/*.js.map
+tests/*.d.ts
+tests/*.d.ts.map
+
 # Logs
 logs/
 *.log

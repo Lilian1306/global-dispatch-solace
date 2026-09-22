@@ -1,6 +1,6 @@
-import { SolaceClient } from '../utils/solace-client.js';
-import { DispatchPublisher } from './publisher.service.js';
-import type { DispatchRequest } from '../types/index.js';
+import { SolaceClient } from '../utils/solace-client';
+import { DispatchPublisher } from './publisher.service';
+import type { DispatchRequest } from '../types/index';
 
 export { DispatchPublisher };
 

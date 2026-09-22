@@ -1,7 +1,7 @@
 import type solace from 'solclientjs';
-import { SolaceClient, parseMessagePayload } from '../utils/solace-client.js';
-import { QUEUES } from '../config/solace.config.js';
-import type { DispatchResult } from '../types/index.js';
+import { SolaceClient, parseMessagePayload } from '../utils/solace-client';
+import { QUEUES } from '../config/solace.config';
+import type { DispatchResult } from '../types/index';
 
 export class ClientPanel {
   private client: SolaceClient;
