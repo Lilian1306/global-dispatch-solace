@@ -76,11 +76,11 @@ async function main(): Promise<void> {
       ],
       transportationReleaseNotes: 'Urgent same-day pickup'
     };
-    // Simulamos que la solicitud del escenario 3 llega a las 4:30 PM (16:30)
+   
     const lateReferenceTime = new Date(now);
     lateReferenceTime.setHours(16, 30, 0, 0);
 
-    // Escenario 4: Fecha de Entrega Inválida (Regla 3)
+  
     const invalidDeliveryOrder: DispatchRequest = {
       shipperOrderId: '9911445',
       pickupDate: formatDate(tomorrow),
@@ -113,7 +113,7 @@ async function main(): Promise<void> {
     console.log('\n--------------------------------------------------');
     console.log('[PUBLISHER:COMPLETE] All test scenarios submitted successfully.');
 
-    // Esperar un breve instante para asegurar el drenado de mensajes en la red
+   
     await new Promise((resolve) => setTimeout(resolve, 2000));
 
     await client.disconnect();

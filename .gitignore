@@ -33,6 +33,7 @@ pnpm-debug.log*
 # Documentos del enunciado y PDFs
 *.pdf
 Proyecto Global Dispatch.pdf
+plan-de-trabajo.md
 
 # Editores e IDEs
 .vscode/
