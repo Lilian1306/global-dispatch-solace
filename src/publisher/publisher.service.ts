@@ -47,14 +47,11 @@ export class DispatchPublisher {
       return cancelledResult;
     }
 
-    // Solicitud válida
+  
     console.log(`[VALIDATION:SUCCESS] Order complies with all business validation rules.`);
-
-    // 1. Publicar a cola de transportistas vía tópico de órdenes
     console.log(`[PUBLISH:ORDERS] Emitting full load details to carriers topic: ${TOPICS.ORDERS}`);
     this.client.publish(TOPICS.ORDERS, order);
 
-    // 2. Publicar confirmación 'Accepted' para el cliente
     const acceptedResult: AcceptedResult = {
       shipperOrderId: order.shipperOrderId,
       status: 'Accepted',
