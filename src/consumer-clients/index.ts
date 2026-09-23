@@ -16,7 +16,6 @@ async function main(): Promise<void> {
     const panel = new ClientPanel(client);
     await panel.start();
 
-    // Manejo de apagado elegante (Ctrl+C)
     const cleanup = async () => {
       console.log('\n[SHUTDOWN] Terminating Client Status Panel service...');
       panel.stop();

@@ -7,8 +7,11 @@ export class ClientPanel {
   private client: SolaceClient;
   private consumer: solace.MessageConsumer | null = null;
 
-  constructor(client: SolaceClient) {
+  private onResultCallback?: ((result: DispatchResult) => void) | undefined;
+
+  constructor(client: SolaceClient, onResult?: (result: DispatchResult) => void) {
     this.client = client;
+    this.onResultCallback = onResult;
   }
 
   /**
@@ -52,6 +55,10 @@ export class ClientPanel {
       }
 
       console.log('='.repeat(60));
+
+      if (this.onResultCallback) {
+        this.onResultCallback(result);
+      }
     } catch (err) {
       console.error('[ERROR:CLIENT-PAYLOAD] Failed to deserialize result payload:', err);
     }

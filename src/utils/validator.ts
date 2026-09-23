@@ -21,7 +21,6 @@ export function validateDispatchRequest(
   const pickupDate = parseDateOnly(order.pickupDate);
   const deliveryDate = parseDateOnly(order.deliveryDate);
 
-  // Rule 1: Pickup date cannot be earlier than current date
   if (pickupDate.getTime() < today.getTime()) {
     return {
       isValid: false,
@@ -29,7 +28,6 @@ export function validateDispatchRequest(
     };
   }
 
-  // Rule 2: Same-day pickup cutoff at 3:00 p.m. (15:00)
   if (pickupDate.getTime() === today.getTime()) {
     const hours = referenceDate.getHours();
     const minutes = referenceDate.getMinutes();
@@ -42,7 +40,6 @@ export function validateDispatchRequest(
     }
   }
 
-  // Rule 3: Delivery date must be at least one day after pickup date
   const msPerDay = 1000 * 60 * 60 * 24;
   const daysDiff = Math.round((deliveryDate.getTime() - pickupDate.getTime()) / msPerDay);
 

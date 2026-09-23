@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NewCron — Global Dispatch System</title>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Toastify Notifications CDN -->
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css" />
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+
+  <!-- Custom Stylesheet -->
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body class="bg-slate-100 text-slate-800 antialiased min-h-screen font-sans">
+
+  <div class="flex min-h-screen">
+
+    <!-- SIDEBAR -->
+    <aside class="w-56 shrink-0 bg-white border-r border-slate-200 flex flex-col">
+      <div class="h-16 flex items-center px-5 border-b border-slate-100">
+        <div class="w-7 h-7 rounded-md bg-blue-600 flex items-center justify-center mr-2.5">
+          <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+          </svg>
+        </div>
+        <span class="font-semibold text-slate-900 text-sm">Global Dispatch</span>
+      </div>
+
+      <nav class="flex-1 px-3 py-4 space-y-5">
+        <div>
+          <p class="px-2 mb-1.5 text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Cliente</p>
+          <button type="button" id="nav-new-request" class="w-full text-left px-2.5 py-1.5 rounded-md text-sm font-semibold bg-slate-100 text-slate-900 transition cursor-pointer">
+            Nueva solicitud
+          </button>
+          <button type="button" id="nav-my-requests" class="w-full text-left px-2.5 py-1.5 rounded-md text-sm font-medium text-slate-600 hover:bg-slate-50 transition cursor-pointer">
+            Mis solicitudes
+          </button>
+        </div>
+        <div>
+          <p class="px-2 mb-1.5 text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Transportista</p>
+          <button type="button" id="nav-available-loads" class="w-full text-left px-2.5 py-1.5 rounded-md text-sm font-medium text-slate-600 hover:bg-slate-50 transition cursor-pointer">
+            Cargas disponibles
+          </button>
+        </div>
+      </nav>
+
+      <div class="px-5 py-4 border-t border-slate-100">
+        <div id="connection-status" class="flex items-center space-x-2 text-xs font-medium text-emerald-700">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          <span id="connection-text">Solace conectado</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="flex-1 p-8 overflow-y-auto">
+
+      <!-- VIEW: NUEVA SOLICITUD -->
+      <section id="view-new-request" class="view max-w-2xl">
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+          <div class="border-b border-slate-100 pb-4 mb-5">
+            <h2 class="text-base font-semibold text-slate-900">Crear Solicitud de Despacho</h2>
+            <p class="text-xs text-slate-500 mt-1">Ingresa los datos del traslado de vehículos para validación NewCron y distribución vía Solace.</p>
+          </div>
+
+          <!-- PRUEBAS RÁPIDAS DE ESCENARIOS (PDF) -->
+          <div class="mb-5">
+            <button type="button" id="test-scenarios-toggle" class="flex items-center space-x-1.5 text-xs font-medium text-slate-500 hover:text-slate-700 transition cursor-pointer">
+              <svg id="test-scenarios-chevron" class="w-3.5 h-3.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+              </svg>
+              <span>Probar escenarios preconfigurados (Especificación PDF)</span>
+            </button>
+
+            <div id="test-scenarios-panel" class="hidden mt-2.5 bg-slate-50 p-3.5 rounded-lg border border-slate-200">
+              <label class="block text-xs font-medium text-slate-600 mb-2 uppercase tracking-wider">Cargar datos de prueba con 1 clic:</label>
+              <div class="grid grid-cols-2 gap-2">
+                <button type="button" data-scenario="1" class="text-xs px-2.5 py-1.5 bg-white border border-slate-300 hover:border-blue-500 hover:text-blue-600 rounded font-medium text-slate-700 text-left transition shadow-xs cursor-pointer">
+                  1. Happy Path (Válido)
+                </button>
+                <button type="button" data-scenario="2" class="text-xs px-2.5 py-1.5 bg-white border border-slate-300 hover:border-red-500 hover:text-red-600 rounded font-medium text-slate-700 text-left transition shadow-xs cursor-pointer">
+                  2. Fecha Pasada (Regla 1)
+                </button>
+                <button type="button" data-scenario="3" class="text-xs px-2.5 py-1.5 bg-white border border-slate-300 hover:border-amber-500 hover:text-amber-600 rounded font-medium text-slate-700 text-left transition shadow-xs cursor-pointer">
+                  3. Hoy > 3:00 PM (Regla 2)
+                </button>
+                <button type="button" data-scenario="4" class="text-xs px-2.5 py-1.5 bg-white border border-slate-300 hover:border-amber-500 hover:text-amber-600 rounded font-medium text-slate-700 text-left transition shadow-xs cursor-pointer">
+                  4. Mismo Día (Regla 3)
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- FORMULARIO DE DESPACHO -->
+          <form id="dispatch-form" class="space-y-4">
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label for="orderId" class="block text-xs font-medium text-slate-700 mb-1">ID de Orden</label>
+                <input type="text" id="orderId" placeholder="ej: 6600111" required class="w-full text-sm px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-hidden font-mono" />
+              </div>
+              <div>
+                <label for="price" class="block text-xs font-medium text-slate-700 mb-1">Tarifa ($ USD)</label>
+                <input type="number" id="price" min="1" placeholder="ej: 900" required class="w-full text-sm px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-hidden" />
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label for="pickupDate" class="block text-xs font-medium text-slate-700 mb-1">Fecha de Recolección (Pick-up)</label>
+                <input type="date" id="pickupDate" required class="w-full text-sm px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-hidden" />
+              </div>
+              <div>
+                <label for="deliveryDate" class="block text-xs font-medium text-slate-700 mb-1">Fecha de Entrega (Delivery)</label>
+                <input type="date" id="deliveryDate" required class="w-full text-sm px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-hidden" />
+              </div>
+            </div>
+
+            <!-- PARADAS DE LA RUTA -->
+            <div class="pt-2 border-t border-slate-100">
+              <label class="block text-xs font-medium text-slate-700 mb-1.5">Itinerario de Ruta (Paradas / Stops)</label>
+              
+              <!-- Parada 1: Origen -->
+              <p class="text-[11px] text-slate-400 mb-1">Parada 1 (Origen):</p>
+              <div class="grid grid-cols-3 gap-2 mb-2">
+                <input type="text" id="stop1City" placeholder="Ciudad (ej: Milford)" class="text-xs px-2.5 py-1.5 border border-slate-300 rounded focus:ring-1 focus:ring-blue-500" required />
+                <input type="text" id="stop1State" placeholder="Estado (ej: MA)" maxlength="2" class="text-xs px-2.5 py-1.5 border border-slate-300 rounded focus:ring-1 focus:ring-blue-500 uppercase" required />
+                <input type="text" id="stop1Zip" placeholder="C.P. (ej: 01757)" class="text-xs px-2.5 py-1.5 border border-slate-300 rounded focus:ring-1 focus:ring-blue-500 font-mono" required />
+              </div>
+
+              <!-- Parada 2: Destino -->
+              <p class="text-[11px] text-slate-400 mb-1">Parada 2 (Destino):</p>
+              <div class="grid grid-cols-3 gap-2">
+                <input type="text" id="stop2City" placeholder="Ciudad (ej: Shippensburg)" class="text-xs px-2.5 py-1.5 border border-slate-300 rounded focus:ring-1 focus:ring-blue-500" required />
+                <input type="text" id="stop2State" placeholder="Estado (ej: PA)" maxlength="2" class="text-xs px-2.5 py-1.5 border border-slate-300 rounded focus:ring-1 focus:ring-blue-500 uppercase" required />
+                <input type="text" id="stop2Zip" placeholder="C.P. (ej: 17257)" class="text-xs px-2.5 py-1.5 border border-slate-300 rounded focus:ring-1 focus:ring-blue-500 font-mono" required />
+              </div>
+            </div>
+
+            <!-- VEHÍCULO A TRANSPORTAR -->
+            <div class="pt-2 border-t border-slate-100">
+              <label class="block text-xs font-medium text-slate-700 mb-1.5">Vehículo a Transportar (Vehicle to Haul)</label>
+              <div class="grid grid-cols-3 gap-2">
+                <input type="text" id="vehicleYear" placeholder="Año (ej: 2010)" class="text-xs px-2.5 py-1.5 border border-slate-300 rounded focus:ring-1 focus:ring-blue-500 font-mono" required />
+                <input type="text" id="vehicleMake" placeholder="Marca (ej: Toyota)" class="text-xs px-2.5 py-1.5 border border-slate-300 rounded focus:ring-1 focus:ring-blue-500" required />
+                <input type="text" id="vehicleModel" placeholder="Modelo (ej: Corolla)" class="text-xs px-2.5 py-1.5 border border-slate-300 rounded focus:ring-1 focus:ring-blue-500" required />
+              </div>
+            </div>
+
+            <!-- NOTAS DE LIBERACIÓN -->
+            <div>
+              <label for="releaseNotes" class="block text-xs font-medium text-slate-700 mb-1">Notas de Liberación (Opcional)</label>
+              <textarea id="releaseNotes" rows="2" placeholder="Instrucciones o especificaciones para el transportista..." class="w-full text-xs px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-hidden resize-none"></textarea>
+            </div>
+
+            <!-- BOTÓN DE ENVÍO -->
+            <button type="submit" id="submitBtn" disabled class="w-full py-2.5 px-4 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium transition flex items-center justify-center space-x-2 shadow-xs cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed">
+              <span>Publish Dispatch Request</span>
+            </button>
+          </form>
+        </div>
+      </section>
+
+      <!-- VIEW: MIS SOLICITUDES -->
+      <section id="view-my-requests" class="view hidden">
+        <div class="flex items-center justify-between mb-5">
+          <div>
+            <h2 class="text-lg font-semibold text-slate-900">Mis solicitudes</h2>
+            <p class="text-xs text-slate-500 mt-0.5">Respuestas y estados recibidos desde <code class="font-mono bg-slate-100 px-1 py-0.5 rounded">dispatch.results.queue</code></p>
+          </div>
+          <div class="flex items-center space-x-2">
+            <button type="button" id="btn-clear-history" title="Borrar historial guardado localmente" class="px-3 py-2 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 text-xs font-medium transition cursor-pointer">
+              Limpiar historial
+            </button>
+            <button type="button" id="btn-goto-new-request" class="px-3.5 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium transition cursor-pointer">
+              + Nueva solicitud
+            </button>
+          </div>
+        </div>
+
+        <!-- CONTADORES -->
+        <div class="grid grid-cols-2 gap-4 mb-5 max-w-md">
+          <div class="bg-white rounded-xl border border-slate-200 p-4">
+            <p class="text-xs text-slate-500 mb-1">Aceptadas (Válidas)</p>
+            <p id="stat-accepted" class="text-xl font-semibold text-emerald-600">0</p>
+          </div>
+          <div class="bg-white rounded-xl border border-slate-200 p-4">
+            <p class="text-xs text-slate-500 mb-1">Canceladas (Rechazadas)</p>
+            <p id="stat-cancelled" class="text-xl font-semibold text-rose-600">0</p>
+          </div>
+        </div>
+
+        <!-- TABLA Y PANEL DE DETALLE -->
+        <div class="grid grid-cols-1 xl:grid-cols-12 gap-5">
+          <div class="xl:col-span-8 bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+            <table class="w-full text-xs border-collapse">
+              <thead>
+                <tr class="text-left text-[10px] font-semibold text-slate-500 uppercase tracking-wider border-b border-slate-200">
+                  <th class="py-2 pr-2">Orden</th>
+                  <th class="py-2 pr-2">Ruta</th>
+                  <th class="py-2 pr-2">Pick-up</th>
+                  <th class="py-2 pr-2">Tarifa</th>
+                  <th class="py-2 pr-2">Estado</th>
+                </tr>
+              </thead>
+              <tbody id="client-results-body">
+                <tr id="client-empty-state">
+                  <td colspan="5" class="py-10 text-center text-slate-400">No hay notificaciones de estado aún. Envía una solicitud desde el formulario.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="xl:col-span-4">
+            <div id="order-detail-panel" class="bg-white rounded-xl shadow-sm border border-slate-200 p-5 sticky top-6">
+              <p class="text-xs text-slate-400">Selecciona una orden de la tabla para ver su detalle e itinerario.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW: CARGAS DISPONIBLES (TRANSPORTISTA) -->
+      <section id="view-available-loads" class="view hidden">
+        <div class="flex items-center justify-between mb-5">
+          <div>
+            <h2 class="text-lg font-semibold text-slate-900">Cargas disponibles</h2>
+            <p class="text-xs text-slate-500 mt-0.5">Pedidos aprobados y listados en <code class="font-mono bg-slate-100 px-1 py-0.5 rounded">dispatch.orders.queue</code></p>
+          </div>
+          <span id="carrier-count" class="text-xs px-2.5 py-1 bg-slate-100 font-semibold text-slate-600 rounded-full font-mono">0 Loads</span>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+          <table class="w-full text-xs border-collapse">
+            <thead>
+              <tr class="text-left text-[10px] font-semibold text-slate-500 uppercase tracking-wider border-b border-slate-200">
+                <th class="py-2 pr-2">Orden</th>
+                <th class="py-2 pr-2">Ruta</th>
+                <th class="py-2 pr-2">Ventana de Fechas</th>
+                <th class="py-2 pr-2">Vehículos</th>
+                <th class="py-2 pr-2 text-right">Tarifa</th>
+              </tr>
+            </thead>
+            <tbody id="carrier-orders-body">
+              <tr id="carrier-empty-state">
+                <td colspan="5" class="py-10 text-center text-slate-400">No hay cargas activas disponibles. Esperando despachos aprobados...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- MODULAR JAVASCRIPT APPLICATION ENTRY POINT -->
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

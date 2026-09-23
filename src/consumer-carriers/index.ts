@@ -16,7 +16,6 @@ async function main(): Promise<void> {
     const dashboard = new CarrierDashboard(client);
     await dashboard.start();
 
-    // Manejo de apagado elegante (Ctrl+C)
     const cleanup = async () => {
       console.log('\n[SHUTDOWN] Terminating Carrier Dashboard service...');
       dashboard.stop();

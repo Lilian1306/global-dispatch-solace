@@ -20,9 +20,6 @@ export interface Vehicle {
   model: string;
 }
 
-/**
- * Solicitud de carga y despacho enviada por el predio / cliente
- */
 export interface DispatchRequest {
   shipperOrderId: string;
   pickupDate: string; // Formato esperado: YYYY-MM-DD

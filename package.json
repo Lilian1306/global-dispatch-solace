@@ -9,6 +9,7 @@
     "start:publisher": "ts-node src/publisher/index.ts",
     "start:carriers": "ts-node src/consumer-carriers/index.ts",
     "start:clients": "ts-node src/consumer-clients/index.ts",
+    "start:web": "ts-node src/web/server.ts",
     "test": "node --test tests/validator.test.ts"
   },
   "keywords": [
@@ -23,9 +24,11 @@
   "license": "ISC",
   "dependencies": {
     "dotenv": "^18.0.2",
+    "express": "^5.2.1",
     "solclientjs": "^10.18.3"
   },
   "devDependencies": {
+    "@types/express": "^5.0.6",
     "@types/node": "^26.6.2",
     "ts-node": "^10.9.2",
     "typescript": "^5.7.2"

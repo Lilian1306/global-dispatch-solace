@@ -7,8 +7,11 @@ export class CarrierDashboard {
   private client: SolaceClient;
   private consumer: solace.MessageConsumer | null = null;
 
-  constructor(client: SolaceClient) {
+  private onOrderCallback?: ((order: DispatchRequest) => void) | undefined;
+
+  constructor(client: SolaceClient, onOrder?: (order: DispatchRequest) => void) {
     this.client = client;
+    this.onOrderCallback = onOrder;
   }
 
   /**
@@ -57,6 +60,10 @@ export class CarrierDashboard {
       console.log(`  Release Notes: ${order.transportationReleaseNotes}`);
       console.log('='.repeat(60));
       console.log('  [STATUS:READY] Load registered in carrier board for assignment.');
+
+      if (this.onOrderCallback) {
+        this.onOrderCallback(order);
+      }
     } catch (err) {
       console.error('[ERROR:CARRIER-PAYLOAD] Failed to deserialize order payload:', err);
     }
