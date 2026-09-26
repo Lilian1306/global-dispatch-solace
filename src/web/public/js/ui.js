@@ -270,7 +270,7 @@ export function updateCarrierCount(count) {
  * @param {boolean} disabled
  * @param {string} [text]
  */
-export function setSubmitButtonState(disabled, text = 'Publish Dispatch Request') {
+export function setSubmitButtonState(disabled, text = 'Enviar solicitud') {
   const btn = document.getElementById('submitBtn');
   if (!btn) return;
   btn.disabled = disabled;

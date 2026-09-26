@@ -68,29 +68,29 @@
             <p class="text-xs text-slate-500 mt-1">Ingresa los datos del traslado de vehículos para validación NewCron y distribución vía Solace.</p>
           </div>
 
-          <!-- PRUEBAS RÁPIDAS DE ESCENARIOS (PDF) -->
+     
           <div class="mb-5">
             <button type="button" id="test-scenarios-toggle" class="flex items-center space-x-1.5 text-xs font-medium text-slate-500 hover:text-slate-700 transition cursor-pointer">
               <svg id="test-scenarios-chevron" class="w-3.5 h-3.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
               </svg>
-              <span>Probar escenarios preconfigurados (Especificación PDF)</span>
+              <span>Probar escenarios con Mock Data</span>
             </button>
 
             <div id="test-scenarios-panel" class="hidden mt-2.5 bg-slate-50 p-3.5 rounded-lg border border-slate-200">
               <label class="block text-xs font-medium text-slate-600 mb-2 uppercase tracking-wider">Cargar datos de prueba con 1 clic:</label>
               <div class="grid grid-cols-2 gap-2">
                 <button type="button" data-scenario="1" class="text-xs px-2.5 py-1.5 bg-white border border-slate-300 hover:border-blue-500 hover:text-blue-600 rounded font-medium text-slate-700 text-left transition shadow-xs cursor-pointer">
-                  1. Happy Path (Válido)
+                  1. Solicitud Válida
                 </button>
                 <button type="button" data-scenario="2" class="text-xs px-2.5 py-1.5 bg-white border border-slate-300 hover:border-red-500 hover:text-red-600 rounded font-medium text-slate-700 text-left transition shadow-xs cursor-pointer">
-                  2. Fecha Pasada (Regla 1)
+                  2. Fecha Pasada
                 </button>
                 <button type="button" data-scenario="3" class="text-xs px-2.5 py-1.5 bg-white border border-slate-300 hover:border-amber-500 hover:text-amber-600 rounded font-medium text-slate-700 text-left transition shadow-xs cursor-pointer">
-                  3. Hoy > 3:00 PM (Regla 2)
+                  3. Fuera de Horario
                 </button>
                 <button type="button" data-scenario="4" class="text-xs px-2.5 py-1.5 bg-white border border-slate-300 hover:border-amber-500 hover:text-amber-600 rounded font-medium text-slate-700 text-left transition shadow-xs cursor-pointer">
-                  4. Mismo Día (Regla 3)
+                  4. Entrega Mismo Día
                 </button>
               </div>
             </div>
@@ -151,21 +151,20 @@
               </div>
             </div>
 
-            <!-- NOTAS DE LIBERACIÓN -->
             <div>
               <label for="releaseNotes" class="block text-xs font-medium text-slate-700 mb-1">Notas de Liberación (Opcional)</label>
               <textarea id="releaseNotes" rows="2" placeholder="Instrucciones o especificaciones para el transportista..." class="w-full text-xs px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-hidden resize-none"></textarea>
             </div>
 
-            <!-- BOTÓN DE ENVÍO -->
+     
             <button type="submit" id="submitBtn" disabled class="w-full py-2.5 px-4 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium transition flex items-center justify-center space-x-2 shadow-xs cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed">
-              <span>Publish Dispatch Request</span>
+              <span>Enviar solicitud</span>
             </button>
           </form>
         </div>
       </section>
 
-      <!-- VIEW: MIS SOLICITUDES -->
+
       <section id="view-my-requests" class="view hidden">
         <div class="flex items-center justify-between mb-5">
           <div>
