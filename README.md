@@ -18,15 +18,45 @@ El servicio publicador (`src/publisher`) evalúa 3 reglas obligatorias antes de 
 
 | Regla | Condición | Comportamiento en caso de incumplimiento |
 | :--- | :--- | :--- |
-| **Regla 1: Pickup no retroactivo** | La fecha de recogida debe ser igual o posterior a la fecha actual (`pickupDate >= current_date`). | Se cancela la orden con la nota:<br>`"Pickup date cannot be earlier than the current date."` |
-| **Regla 2: Límite horario para el mismo día** | Si la recogida es para el mismo día (`pickupDate == current_date`), la solicitud debe enviarse a más tardar a las **3:00 p.m. (15:00 hrs)**. | Se cancela la orden con la nota explicativa:<br>`"Same-day pickup requests cannot be submitted after 3:00 p.m."` |
-| **Regla 3: Margen mínimo de entrega** | La fecha de entrega debe ser al menos 1 día posterior a la recogida (`deliveryDate > pickupDate` con $\ge 24\text{ horas}$). | Se cancela la orden indicando:<br>`"Delivery date must be at least one day after pickup date."` |
+| **Regla 1: Recolección no retroactiva** | La fecha de recolección debe ser igual o posterior a la fecha actual (`pickupDate >= current_date`). | Se cancela la orden con la nota:<br>`"Pickup date cannot be earlier than the current date."` |
+| **Regla 2: Límite horario para el mismo día** | Si la recolección es para el mismo día (`pickupDate == current_date`), la solicitud debe enviarse a más tardar a las **3:00 p.m. (15:00 hrs)**. | Se cancela la orden con la nota explicativa:<br>`"Same-day pickup requests cannot be submitted after 3:00 p.m."` |
+| **Regla 3: Margen mínimo de entrega** | La fecha de entrega debe ser al menos 1 día posterior a la recolección (`deliveryDate > pickupDate` con $\ge 24\text{ horas}$). | Se cancela la orden indicando:<br>`"Delivery date must be at least one day after pickup date."` |
 
 ---
 
 ## 3. Arquitectura de Mensajería con Solace PubSub+
 
-El sistema utiliza **Mensajería Garantizada (*Guaranteed Messaging*)** mediante el mapeo de tópicos taxonómicos a colas persistentes exclusivas:
+El sistema implementa una **Arquitectura Dirigida por Eventos (EDA)** y utiliza **Mensajería Garantizada (*Guaranteed Messaging*)** mediante el mapeo de tópicos taxonómicos a colas persistentes exclusivas:
+
+```mermaid
+flowchart TD
+    subgraph Cliente ["👤 Clientes de NewCron"]
+        A["Solicitud de Despacho (JSON Payload)"]
+    end
+
+    subgraph Core ["⚙️ Servicio Validador & Dispatcher"]
+        B["Validador de Reglas de Negocio"]
+        C{"¿Cumple Reglas de Fecha y Hora?"}
+    end
+
+    subgraph Solace ["☁️ Solace PubSub+ Broker"]
+        Q_Orders[("Cola: dispatch.orders.queue<br>Tópico: dispatch/orders/newcron")]
+        Q_Results[("Cola: dispatch.results.queue<br>Tópico: dispatch/results/newcron")]
+    end
+
+    subgraph Consumidores ["🖥️ Aplicaciones Consumidoras"]
+        Dashboard["🚚 Dashboard de Transportistas<br>(Visualización y Aceptación de Cargas)"]
+        Panel["👥 Panel de Clientes<br>(Visualización de Estados: Accepted / Cancelled)"]
+    end
+
+    A --> B
+    B --> C
+    C -- "✅ Válido" --> Q_Orders
+    C -- "✅ Válido (Accepted)" --> Q_Results
+    C -- "❌ Inválido (Cancelled)" --> Q_Results
+    Q_Orders --> Dashboard
+    Q_Results --> Panel
+```
 
 ```text
 [Cliente / Shipper]
@@ -72,7 +102,14 @@ global-dispatch-solace/
 │   └── web/
 │       ├── server.ts               # Servidor Express con Server-Sent Events (SSE)
 │       └── public/
-│           └── index.html          # Interfaz web interactiva con Tailwind y Toastify
+│           ├── index.html          # Interfaz web interactiva con Tailwind y Toastify
+│           ├── css/
+│           │   └── styles.css      # Estilos personalizados
+│           └── js/
+│               ├── app.js          # Orquestador del frontend y eventos
+│               ├── api.js          # Peticiones HTTP y conexión SSE
+│               ├── storage.js      # Persistencia de órdenes en LocalStorage
+│               └── ui.js           # Renderizado de interfaz y notificaciones Toastify
 ├── tests/
 │   └── validator.test.ts           # Suite de 13 pruebas unitarias automatizadas
 ├── .env.example                    # Plantilla de variables de entorno
@@ -136,10 +173,14 @@ npm run start:web
 
 Abre en tu navegador: **`http://localhost:3000`**
 
-* **Formulario interactivo:** Permite ingresar cualquier orden con fechas libres.
-* **Botones de 1-clic:** Ejecutan instantáneamente los 4 casos de prueba del PDF.
-* **Notificaciones Toastify:** Avisos emergentes en la esquina superior derecha indicando aprobación o motivo de rechazo.
-* **Tableros en vivo:** Muestran la llegada de cargas y resoluciones vía Server-Sent Events (SSE).
+* **Formulario interactivo:** Permite ingresar cualquier orden con fechas libres y enviarla mediante el botón **"Enviar solicitud"**.
+* **Probar escenarios con Mock Data (1-clic):** Permite cargar instantáneamente los 4 casos de prueba preconfigurados con un solo clic:
+  * **1. Solicitud Válida** (Camino feliz / aprobada)
+  * **2. Fecha Pasada** (Incumple Regla 1)
+  * **3. Fuera de Horario** (Incumple Regla 2 — Hoy después de las 3:00 PM)
+  * **4. Entrega Mismo Día** (Incumple Regla 3 — Margen menor a 24 horas)
+* **Notificaciones Toastify:** Avisos emergentes en tiempo real en la esquina superior derecha indicando aprobación o motivo de rechazo.
+* **Tableros en vivo:** Muestran la llegada de cargas en **"Cargas disponibles"** y las respuestas en **"Mis solicitudes"** vía Server-Sent Events (SSE).
 
 ---
 
@@ -163,12 +204,12 @@ Si se desea probar cada microservicio por separado en terminales independientes:
 
 ## 8. Escenarios de Prueba Contemplados
 
-| # | Escenario | Entrada | Resultado Esperado |
+| # | Escenario (Mock Data) | Entrada | Resultado Esperado |
 | :-: | :--- | :--- | :--- |
-| **1** | **Happy Path (Válido)** | Pickup = Mañana, Delivery = Pasado mañana | Orden publicada a transportistas y estado `Accepted` para el cliente. |
-| **2** | **Fecha pasada (Regla 1)** | Pickup = Ayer | Cancelada con `"Pickup date cannot be earlier than the current date."`. No llega a transportistas. |
-| **3** | **Mismo día fuera de hora (Regla 2)** | Pickup = Hoy, hora de envío = 16:30 hrs | Cancelada con `"Same-day pickup requests cannot be submitted after 3:00 p.m."`. No llega a transportistas. |
-| **4** | **Delivery inválido (Regla 3)** | Pickup = Mañana, Delivery = Mañana | Cancelada con `"Delivery date must be at least one day after pickup date."`. No llega a transportistas. |
+| **1** | **Solicitud Válida** | Recolección (*pickup*) = Mañana, Entrega (*delivery*) = Pasado mañana | Orden publicada a transportistas y estado `Accepted` para el cliente. |
+| **2** | **Fecha Pasada** | Recolección (*pickup*) = Ayer | Cancelada con `"Pickup date cannot be earlier than the current date."`. No llega a transportistas. |
+| **3** | **Fuera de Horario** | Recolección (*pickup*) = Hoy, hora de envío > 15:00 hrs | Cancelada con `"Same-day pickup requests cannot be submitted after 3:00 p.m."`. No llega a transportistas. |
+| **4** | **Entrega Mismo Día** | Recolección (*pickup*) = Mañana, Entrega (*delivery*) = Mañana | Cancelada con `"Delivery date must be at least one day after pickup date."`. No llega a transportistas. |
 
 ---
 

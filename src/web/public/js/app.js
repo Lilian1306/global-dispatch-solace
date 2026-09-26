@@ -44,7 +44,7 @@ function setupFormValidation() {
 
   const validate = () => {
     const isValid = form.checkValidity();
-    ui.setSubmitButtonState(!isValid, 'Publish Dispatch Request');
+    ui.setSubmitButtonState(!isValid, 'Enviar solicitud');
   };
 
   form.addEventListener('input', validate);
@@ -63,7 +63,7 @@ async function handleSubmitOrder(e) {
   e.preventDefault();
   const form = e.target;
 
-  ui.setSubmitButtonState(true, 'Publishing to Solace...');
+  ui.setSubmitButtonState(true, 'Enviando a Solace...');
 
   const order = {
     shipperOrderId: document.getElementById('orderId').value.trim(),
@@ -106,7 +106,7 @@ async function handleSubmitOrder(e) {
 
       // Limpiar formulario y restablecer validación
       form.reset();
-      ui.setSubmitButtonState(true, 'Publish Dispatch Request');
+      ui.setSubmitButtonState(true, 'Enviar solicitud');
 
       // Cambiar a la vista "Mis solicitudes" para ver el resultado inmediatamente
       ui.switchView('my-requests');
@@ -118,7 +118,7 @@ async function handleSubmitOrder(e) {
     ui.showToast('Error inesperado al conectar con el servidor', 'error');
   } finally {
     const isValid = form.checkValidity();
-    ui.setSubmitButtonState(!isValid, 'Publish Dispatch Request');
+    ui.setSubmitButtonState(!isValid, 'Enviar solicitud');
   }
 }
 
