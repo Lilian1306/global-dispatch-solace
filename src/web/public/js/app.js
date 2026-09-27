@@ -18,6 +18,7 @@ const notifiedOrderStatuses = new Set();
  */
 function init() {
   setupNavigation();
+  setupMobileMenu();
   setupFormValidation();
   setupTestScenarios();
   setupClearHistory();
@@ -33,6 +34,36 @@ function setupNavigation() {
   document.getElementById('nav-my-requests')?.addEventListener('click', () => ui.switchView('my-requests'));
   document.getElementById('nav-available-loads')?.addEventListener('click', () => ui.switchView('available-loads'));
   document.getElementById('btn-goto-new-request')?.addEventListener('click', () => ui.switchView('new-request'));
+}
+
+/**
+ * Sets up mobile off-canvas drawer navigation toggle and backdrop.
+ */
+function setupMobileMenu() {
+  const openBtn = document.getElementById('mobile-menu-btn');
+  const closeBtn = document.getElementById('mobile-close-btn');
+  const backdrop = document.getElementById('mobile-backdrop');
+  const sidebar = document.getElementById('sidebar');
+
+  const openDrawer = () => {
+    sidebar?.classList.remove('-translate-x-full');
+    backdrop?.classList.remove('hidden');
+  };
+
+  const closeDrawer = () => {
+    sidebar?.classList.add('-translate-x-full');
+    backdrop?.classList.add('hidden');
+  };
+
+  openBtn?.addEventListener('click', openDrawer);
+  closeBtn?.addEventListener('click', closeDrawer);
+  backdrop?.addEventListener('click', closeDrawer);
+
+  // Close drawer automatically when clicking navigation items
+  const navIds = ['nav-new-request', 'nav-my-requests', 'nav-available-loads', 'btn-goto-new-request'];
+  navIds.forEach((id) => {
+    document.getElementById(id)?.addEventListener('click', closeDrawer);
+  });
 }
 
 /**
