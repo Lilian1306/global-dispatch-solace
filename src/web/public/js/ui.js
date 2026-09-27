@@ -68,14 +68,25 @@ export function switchView(view) {
 export function updateConnectionStatus(status) {
   const badge = document.getElementById('connection-status');
   const text = document.getElementById('connection-text');
-  if (!badge || !text) return;
+  const mobileBadge = document.getElementById('mobile-connection-status');
+  const mobileText = document.getElementById('mobile-connection-text');
 
-  if (status === 'connected') {
-    badge.className = 'flex items-center space-x-2 text-xs font-medium text-emerald-700';
-    text.innerText = 'Solace conectado';
-  } else {
-    badge.className = 'flex items-center space-x-2 text-xs font-medium text-amber-600';
-    text.innerText = 'Reconectando...';
+  const isConnected = status === 'connected';
+  const label = isConnected ? 'Solace conectado' : 'Reconectando...';
+  const badgeClass = isConnected
+    ? 'flex items-center space-x-2 text-xs font-medium text-emerald-700'
+    : 'flex items-center space-x-2 text-xs font-medium text-amber-600';
+  const mobileBadgeClass = isConnected
+    ? 'flex items-center space-x-1.5 text-[11px] font-medium text-emerald-700'
+    : 'flex items-center space-x-1.5 text-[11px] font-medium text-amber-600';
+
+  if (badge && text) {
+    badge.className = badgeClass;
+    text.innerText = label;
+  }
+  if (mobileBadge && mobileText) {
+    mobileBadge.className = mobileBadgeClass;
+    mobileText.innerText = label;
   }
 }
 
@@ -262,7 +273,7 @@ export function updateCounters(accepted, cancelled) {
  */
 export function updateCarrierCount(count) {
   const badge = document.getElementById('carrier-count');
-  if (badge) badge.innerText = `${count} Loads`;
+  if (badge) badge.innerText = `${count} ${count === 1 ? 'Carga' : 'Cargas'}`;
 }
 
 /**
